@@ -1,0 +1,159 @@
+[gd_scene load_steps=17 format=3 uid="uid://mc3jatjxpqkg"]
+
+[ext_resource type="PackedScene" uid="uid://ejextcuu0a32" path="res://main_character.tscn" id="1_84x8b"]
+[ext_resource type="PackedScene" uid="uid://ca0cv6h1swehi" path="res://bigbot.tscn" id="2_k8i8m"]
+
+[sub_resource type="ProceduralSkyMaterial" id="ProceduralSkyMaterial_k8i8m"]
+sky_curve = 0.23537512
+sun_angle_max = 57.34
+
+[sub_resource type="Sky" id="Sky_5g1n5"]
+sky_material = SubResource("ProceduralSkyMaterial_k8i8m")
+
+[sub_resource type="Environment" id="Environment_xlgg2"]
+background_mode = 2
+sky = SubResource("Sky_5g1n5")
+ambient_light_source = 3
+ambient_light_color = Color(0.41663843, 0.499359, 0.68116534, 1)
+tonemap_mode = 3
+
+[sub_resource type="CameraAttributesPractical" id="CameraAttributesPractical_spl21"]
+
+[sub_resource type="Gradient" id="Gradient_k8i8m"]
+offsets = PackedFloat32Array(0.2, 1)
+colors = PackedColorArray(1, 1, 1, 1, 0, 0, 0, 1)
+
+[sub_resource type="FastNoiseLite" id="FastNoiseLite_5g1n5"]
+noise_type = 2
+frequency = 0.03
+cellular_jitter = 3.0
+cellular_return_type = 0
+domain_warp_enabled = true
+domain_warp_type = 1
+domain_warp_amplitude = 50.0
+domain_warp_fractal_type = 2
+domain_warp_fractal_lacunarity = 1.5
+domain_warp_fractal_gain = 1.0
+
+[sub_resource type="NoiseTexture2D" id="NoiseTexture2D_xlgg2"]
+noise = SubResource("FastNoiseLite_5g1n5")
+color_ramp = SubResource("Gradient_k8i8m")
+seamless = true
+
+[sub_resource type="Terrain3DMaterial" id="Terrain3DMaterial_spl21"]
+_shader_parameters = {
+&"auto_base_texture": 0,
+&"auto_height_reduction": 0.1,
+&"auto_overlay_texture": 1,
+&"auto_slope": 1.0,
+&"bias_distance": 512.0,
+&"blend_sharpness": 0.5,
+&"depth_blur": 0.0,
+&"enable_macro_variation": true,
+&"enable_projection": true,
+&"flat_terrain_normals": false,
+&"macro_variation1": Color(0.31194487, 0.41997516, 0.2976811, 1),
+&"macro_variation2": Color(0.3504406, 0.50034976, 0.62336004, 1),
+&"macro_variation_slope": 0.333,
+&"mipmap_bias": 1.0,
+&"noise1_angle": 0.0,
+&"noise1_offset": Vector2(0.5, 0.5),
+&"noise1_scale": 0.04,
+&"noise2_scale": 0.076,
+&"noise_texture": SubResource("NoiseTexture2D_xlgg2"),
+&"projection_threshold": 0.8
+}
+auto_shader = true
+show_checkered = true
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_efnwn"]
+transparency = 4
+cull_mode = 2
+vertex_color_use_as_albedo = true
+backlight_enabled = true
+backlight = Color(0.5, 0.5, 0.5, 1)
+distance_fade_mode = 1
+distance_fade_min_distance = 128.0
+distance_fade_max_distance = 96.0
+
+[sub_resource type="Terrain3DMeshAsset" id="Terrain3DMeshAsset_lho3r"]
+generated_type = 1
+height_offset = 0.5
+material_override = SubResource("StandardMaterial3D_efnwn")
+last_lod = 0
+last_shadow_lod = 0
+lod0_range = 128.0
+
+[sub_resource type="Terrain3DAssets" id="Terrain3DAssets_4qs07"]
+mesh_list = Array[Terrain3DMeshAsset]([SubResource("Terrain3DMeshAsset_lho3r")])
+
+[sub_resource type="PhysicsMaterial" id="PhysicsMaterial_k8i8m"]
+
+[sub_resource type="BoxMesh" id="BoxMesh_k8i8m"]
+size = Vector3(100, 2, 30)
+
+[sub_resource type="ConvexPolygonShape3D" id="ConvexPolygonShape3D_k8i8m"]
+points = PackedVector3Array(-50, -1, -15, -50, 1, -15, 50, -1, -15, -50, -1, 14.999998, -50, 1, 14.999998, 50, 1, -15, 50, -1, 14.999998, 50, 1, 14.999998)
+
+[node name="master" type="Node3D"]
+
+[node name="MCbot" parent="." instance=ExtResource("2_k8i8m")]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.0358539, 2.8266811, -0.62388515)
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+environment = SubResource("Environment_xlgg2")
+camera_attributes = SubResource("CameraAttributesPractical_spl21")
+
+[node name="Terrain3D" type="Terrain3D" parent="."]
+data_directory = "res://terrain"
+material = SubResource("Terrain3DMaterial_spl21")
+assets = SubResource("Terrain3DAssets_4qs07")
+collision_shape_size = 32
+collision_radius = 192
+collision_layer = 3
+physics_material = SubResource("PhysicsMaterial_k8i8m")
+show_checkered = true
+top_level = true
+metadata/_edit_lock_ = true
+
+[node name="DirectionalLight3D" type="DirectionalLight3D" parent="."]
+
+[node name="main_character 🤠" parent="." instance=ExtResource("1_84x8b")]
+
+[node name="box" type="StaticBody3D" parent="."]
+collision_layer = 3
+collision_mask = 3
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="box"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32943916, -29.564152)
+mesh = SubResource("BoxMesh_k8i8m")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32943916, -29.564152)
+shape = SubResource("ConvexPolygonShape3D_k8i8m")
+
+[node name="box2" type="StaticBody3D" parent="."]
+transform = Transform3D(-0.17596808, 0, -0.98439586, 0, 1, 0, 0.98439586, 0, -0.17596808, 0, 12.094162, -12.672588)
+collision_layer = 3
+collision_mask = 3
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="box2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32943916, -29.564152)
+mesh = SubResource("BoxMesh_k8i8m")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box2"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32943916, -29.564152)
+shape = SubResource("ConvexPolygonShape3D_k8i8m")
+
+[node name="box3" type="StaticBody3D" parent="."]
+transform = Transform3D(0.8919791, 0, -0.45207667, 0, 1, 0, 0.45207667, 0, 0.8919791, -19.795088, 29.923218, -12.672588)
+collision_layer = 3
+collision_mask = 3
+
+[node name="MeshInstance3D" type="MeshInstance3D" parent="box3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32943916, -29.564152)
+mesh = SubResource("BoxMesh_k8i8m")
+
+[node name="CollisionShape3D" type="CollisionShape3D" parent="box3"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.32943916, -29.564152)
+shape = SubResource("ConvexPolygonShape3D_k8i8m")

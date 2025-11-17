@@ -1,0 +1,9 @@
+[gd_scene load_steps=3 format=3 uid="uid://ca0cv6h1swehi"]
+
+[ext_resource type="PackedScene" uid="uid://dk47t668l8ckk" path="res://MCbot.blend" id="1_d1nhe"]
+[ext_resource type="Material" path="res://power_tuber_mat.tres" id="2_xmkf1"]
+
+[node name="MCbot" instance=ExtResource("1_d1nhe")]
+
+[node name="Cylinder" parent="body" index="0"]
+surface_material_override/0 = ExtResource("2_xmkf1")
