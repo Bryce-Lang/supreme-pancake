@@ -194,6 +194,9 @@ func _physics_process(delta: float) -> void:
 # pounding ---------------------------------------------------------------------
 	if Input.is_action_pressed("pound") && !Input.is_action_pressed("jump"):
 		is_pounding = 1
+	if is_pounding && velocity.y > 0.0 && height < hover_height:
+		velocity.y *= .5 + clampf(0.5 - (velocity.y), 0.0, 0.5)
+		print(velocity.y)
 # ------------------------------------------------------------------------------
 
 	# Add the gravity.
@@ -305,30 +308,29 @@ func _physics_process(delta: float) -> void:
 	#var slope_probe_top_ray = slope_probe_top.get_collision_point() - slope_probe_top.global_position
 	
 	# dont ask
-	#if slope_probe_bottom.is_colliding() && velocity.length() > 4.2 && 0.0 < slope_probe_bottom_ray.length() && slope_probe_bottom_ray.length() < 8.4 && (slope_probe_top_ray.length() > (slope_probe_bottom_ray.length() - 0.1) || !slope_probe_top.is_colliding()):
-	#	slope_hover_err = (slope_probe_bottom.target_position.x - slope_probe_bottom_ray.length()) / (slope_probe_bottom.target_position.x * 2.0)
+	# if slope_probe_bottom.is_colliding() && velocity.length() > 4.2 && 0.0 < slope_probe_bottom_ray.length() && slope_probe_bottom_ray.length() < 8.4 && (slope_probe_top_ray.length() > (slope_probe_bottom_ray.length() - 0.1) || !slope_probe_top.is_colliding()):
+	# slope_hover_err = (slope_probe_bottom.target_position.x - slope_probe_bottom_ray.length()) / (slope_probe_bottom.target_position.x * 2.0)
 	
 	# ok forget that last part ima try and actually do it here using obstacle_height_probe to detect inclines and modify hover height accordingly
 	# set obstacle_height_probe position
 	var land_speed = Vector2(velocity.x, velocity.z).length()
+	var raw_probed_dist = obstacle_distance_probe.get_collision_point().distance_to(obstacle_distance_probe.global_position)
+	var raw_probed_dist_low = obstacle_distance_probe_low.get_collision_point().distance_to(obstacle_distance_probe_low.global_position) - 2.0
+	raw_probed_dist = 420.0 if !obstacle_distance_probe.is_colliding() else raw_probed_dist
+	raw_probed_dist_low = 420.0 if !obstacle_distance_probe_low.is_colliding() else raw_probed_dist_low
+	print(raw_probed_dist_low)
+	var probed_dist = minf(raw_probed_dist, raw_probed_dist_low)
+	var probe_dist_res = minf(land_speed, probed_dist + 0.1)
 	
-	var obstacle_distance = obstacle_distance_probe.get_collision_point().distance_to(obstacle_distance_probe.global_position)
-	var obstacle_probe_dist = 0.0
+	ceiling_height_probe.position.x = probe_dist_res
+	obstacle_height_probe.position.x = probe_dist_res
 	
-	if obstacle_distance_probe.is_colliding():
-		obstacle_probe_dist = minf(land_speed, obstacle_distance + 0.1)
-	else:
-		obstacle_probe_dist = land_speed
-	
-	ceiling_height_probe.position.x = obstacle_probe_dist
-	obstacle_height_probe.position.x = obstacle_probe_dist
-	
-	
+	# measures distance from player level to ceiling at obstacle height probing distance; limited to 42.0 meters
 	var ceiling_height_local = (ceiling_height_probe.get_collision_point().y - ceiling_height_probe.global_position.y)
+	ceiling_height_local = 42.0 if !ceiling_height_probe.is_colliding() else ceiling_height_local # if ceiling_height_probe is not colliding, set ceiling_height_local to 42.0
 	
-	obstacle_height_probe.position.y = minf(42.0, ceiling_height_local - 0.01)
-	print(ceiling_height_local)
-	
+	obstacle_height_probe.position.y = ceiling_height_local - 0.1
+	#print(ceiling_height_local)
 	
 	var obstacle_height_probe_hit_point = obstacle_height_probe.get_collision_point()
 	var hover_target = obstacle_height_probe_hit_point + Vector3(0,hover_height,0)
@@ -336,13 +338,12 @@ func _physics_process(delta: float) -> void:
 	slope_probe_bottom.target_position = slope_probe_bottom.to_local(hover_target) #(obstacle_height_probe_hit_point + Vector3(0,hover_height,0), Vector3(0,1,0), true)
 	
 	var hover_target_height_local = tail.to_local(hover_target).y
-	#print(hover_target_height_local)
 	
+	# apply upward velocity as needed when slopes and obstacles are detected (and no obstacles that would block path are detected)
 	if land_speed > 4.2 && hover_target_height_local > 0.0 && !slope_probe_bottom.is_colliding() && !slope_probe_top.is_colliding():
 		#target_hover_err = clampf(hover_target_height_local / 4.0, 0.0, 1.42)
-		velocity.y += (hover_target_height_local) / clampf(obstacle_probe_dist * obstacle_probe_dist, 2.0, 12.0)
+		velocity.y += (hover_target_height_local) / clampf(probe_dist_res * probe_dist_res, 2.0, 4.2)
 
-	
 	if !is_jumping:
 		# normal hover
 		if height < hover_height:
@@ -357,20 +358,15 @@ func _physics_process(delta: float) -> void:
 			
 			var hover_velocity = (kp * curr_hover_err) + (kd * smooth_hover_derivative)
 			
-			#print(hover_velocity)
 			hover_velocity = clampf(hover_velocity, 0, 142)
 			velocity.y += hover_velocity * delta
 			#if hover_velocity > -0.001 and hover_velocity < 420.2: # trim harsh velocity additions
-			
-			#print(hover_velocity * delta)
 			
 			last_hover_err = curr_hover_err
 		
 		# dampen upward momentum to avoid excessive bounciness and soaring of hills
 		if velocity.y > 0.0 && last_height < height:
 			velocity.y *= .86 + (.14 - clampf(velocity.y / 180.0, 0.0, 0.14))
-			#print(velocity.y / 200.0)
-			#print("damping")
 	# ----------------------------------------------------------------------------------------------
 
 	# DEPRECATED:

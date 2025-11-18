@@ -2101,7 +2101,7 @@ mesh = SubResource("CylinderMesh_20pf0")
 [node name="model_global_transform" type="Node3D" parent="."]
 
 [node name="obstacle_height_probe" type="RayCast3D" parent="model_global_transform"]
-transform = Transform3D(-1.0407477e-07, 0, 2.3809526, 0, 2.3809526, 0, -2.3809526, 0, -1.0407477e-07, 0, 8.729, 0)
+transform = Transform3D(2.3809526, 0, 0, 0, 2.3809526, 0, 0, 0, 2.3809526, 0, 8.729, 0)
 target_position = Vector3(0, -420, 0)
 collision_mask = 2
 
@@ -2118,8 +2118,8 @@ collision_mask = 2
 hit_back_faces = false
 
 [node name="obstacle_distance_probe_low" type="RayCast3D" parent="model_global_transform"]
-transform = Transform3D(2.3809526, 0, 0, 0, 2.3809526, 0, 0, 0, 2.3809526, -1, -1, 0)
-target_position = Vector3(42, -1, 0)
+transform = Transform3D(2.3809526, 0, 0, 0, 2.3809526, 0, 0, 0, 2.3809526, -2, -1.43, 0)
+target_position = Vector3(42, 0, 0)
 collision_mask = 2
 hit_back_faces = false
 

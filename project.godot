@@ -13,7 +13,7 @@ config_version=5
 config/name="Project_S"
 run/main_scene="uid://mc3jatjxpqkg"
 config/features=PackedStringArray("4.5", "Forward Plus")
-run/max_fps=180
+run/max_fps=420
 config/icon="res://icon.svg"
 
 [debug]
